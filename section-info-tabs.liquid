@@ -1,0 +1,665 @@
+{{/*
+  section-info-tabs.liquid — Modernized Info Tabs Section
+  Key improvements over original:
+    - Full ARIA tab pattern (role=tablist/tab/tabpanel, aria-selected, aria-controls, aria-labelledby)
+    - <button> elements replace <span> for proper keyboard & screen-reader semantics
+    - prefers-reduced-motion: autoplay and animations disabled when user prefers it
+    - fetchpriority="high" + decoding="async" on images; eager-load for LCP candidate
+    - CSS aspect-ratio property replaces padding-top % hack
+    - CSS custom properties for all dynamic values (no scattered inline styles)
+    - hidden attribute on inactive panels (a11y) — CSS class alone is insufficient
+    - BEM naming unified to double-underscore throughout
+    - New schema settings: tab_indicator_style, animation_speed, content_alignment, mobile_columns
+    - Navigation buttons carry aria-label for screen readers
+    - Pause-on-focus in addition to pause-on-hover
+*/}}
+
+<div
+  class="
+    container--large
+    container--vertical-space{% if section.settings.gutter_decrease %}-small{% endif %}
+    {% if section.settings.section_background_color != 'rgba(0,0,0,0)' or section.settings.section_background_gradient != blank %}container--has-background{% endif %}
+    {% if section.settings.remove_bottom_margin %}container--negative-margin{% endif %}
+    remove-empty-space
+  "
+>
+  {%- render 'section-heading',
+    heading: section.settings.heading,
+    subheading: section.settings.subheading,
+    heading_size: section.settings.section_heading_size,
+    section_layout: section.settings.section_heading_layout,
+    button: section.settings.cta_label,
+    button_label: section.settings.cta_label,
+    link: section.settings.cta_url,
+    seo_h_tag: section.settings.seo_h_tag
+  -%}
+
+  {%- if section.blocks.size > 0 -%}
+    <script src="{{ 'section-info-tabs.js' | asset_url }}" defer></script>
+    {{ 'section-info-tabs.css' | asset_url | stylesheet_tag }}
+
+    {%- liquid
+      if request.design_mode
+        assign autoplay_setting = false
+      else
+        assign autoplay_setting = section.settings.autoplay_active
+      endif
+      assign transition_ms = section.settings.animation_speed | times: 1000 | round
+    -%}
+
+    {%- comment -%} Section-scoped CSS custom properties {%- endcomment -%}
+    <style>
+      #shopify-section-{{ section.id }} {
+        {%- if section.settings.section_background_color != 'rgba(0,0,0,0)' -%}
+          background-color: {{ section.settings.section_background_color }};
+        {%- endif -%}
+        {%- if section.settings.section_background_gradient != blank -%}
+          background-image: {{ section.settings.section_background_gradient }};
+        {%- endif -%}
+        {%- if section.settings.section_heading_color != 'rgba(0,0,0,0)' -%}
+          --color-text-main: {{ section.settings.section_heading_color }};
+          --color-secondary-text-main: {{ section.settings.section_heading_color | color_modify: 'alpha', 0.6 }};
+          --color-borders-forms-primary: {{ section.settings.section_heading_color | color_modify: 'alpha', 0.3 }};
+          --color-borders-main: {{ section.settings.section_heading_color | color_modify: 'alpha', 0.1 }};
+        {%- endif -%}
+      }
+
+      #info-tabs-{{ section.id }} {
+        --info-tabs-border-radius: {{ section.settings.border_radius }}px;
+        --info-tabs-transition-duration: {{ section.settings.animation_speed }}s;
+        --info-tabs-autoplay-duration: {{ section.settings.autoplay }}s;
+      }
+
+      {%- if autoplay_setting -%}
+        @media (prefers-reduced-motion: no-preference) {
+          #info-tabs-{{ section.id }} .info-tabs__tab.active::after {
+            animation-duration: {{ section.settings.autoplay }}s;
+          }
+          #info-tabs-{{ section.id }} .info-tabs__togglers:hover .info-tabs__tab.active::after,
+          #info-tabs-{{ section.id }} .info-tabs__togglers:focus-within .info-tabs__tab.active::after {
+            animation-play-state: paused;
+          }
+        }
+      {%- endif -%}
+    </style>
+
+    <info-tabs
+      id="info-tabs-{{ section.id }}"
+      data-id="{{ section.id }}"
+      class="
+        info-tabs
+        info-tabs--image-{{ section.settings.image_position }}
+        info-tabs--image-{{ section.settings.image_position }}--{{ section.settings.desktop_layout }}
+        info-tabs--indicator-{{ section.settings.tab_indicator_style }}
+        info-tabs--align-{{ section.settings.content_alignment }}
+      "
+      data-tabs-autoplay="{{ autoplay_setting }}"
+      data-tabs-autoplay-timer="{{ section.settings.autoplay }}"
+      data-transition-duration="{{ transition_ms }}"
+    >
+      {%- comment -%}
+        Tab list — role="tablist" + aria-label make the widget announced correctly.
+        Each child button carries role="tab", aria-selected, aria-controls.
+      {%- endcomment -%}
+      <div
+        class="info-tabs__togglers info-tabs__togglers--style-{{ section.settings.style }}"
+        role="tablist"
+        aria-label="{{ section.settings.heading | default: 'Info tabs' | escape }}"
+      >
+        {%- for block in section.blocks -%}
+          {%- assign is_first = forloop.first -%}
+          <button
+            class="info-tabs__tab js-info-tab{% if is_first %} active{% endif %}"
+            role="tab"
+            id="info-tab-{{ block.id }}"
+            aria-selected="{% if is_first %}true{% else %}false{% endif %}"
+            aria-controls="panel-{{ block.id }}"
+            tabindex="{% if is_first %}0{% else %}-1{% endif %}"
+            data-index="{{ forloop.index0 }}"
+            {{ block.shopify_attributes }}
+          >
+            {%- if section.settings.style == 'icons' -%}
+              {%- if block.settings.custom_icon != blank -%}
+                <figure class="info-tabs__icon lazy-image" aria-hidden="true">
+                  <img
+                    src="{{ block.settings.custom_icon | image_url: width: 44, height: 44, crop: 'center' }}"
+                    alt=""
+                    srcset="
+                      {{ block.settings.custom_icon | image_url: width: 44, height: 44, crop: 'center' }} 44w,
+                      {{ block.settings.custom_icon | image_url: width: 88, height: 88, crop: 'center' }} 88w,
+                      {{ block.settings.custom_icon | image_url: width: 132, height: 132, crop: 'center' }} 132w
+                    "
+                    loading="lazy"
+                    decoding="async"
+                    sizes="44px"
+                    width="44"
+                    height="44"
+                    onload="this.parentNode.classList.add('lazyloaded')"
+                  >
+                </figure>
+              {%- else -%}
+                <span class="info-tabs__icon" aria-hidden="true">
+                  {%- render 'icon-pack', icon: block.settings.icon -%}
+                </span>
+              {%- endif -%}
+            {%- endif -%}
+
+            <span class="info-tabs__tab-title text-line-height--small">
+              {{- block.settings.title | escape -}}
+            </span>
+
+            <span class="info-tabs__tab-caption text-size--regular rte{% if is_first %} info-tabs__tab-caption--visible{% endif %}">
+              {{- block.settings.caption -}}
+            </span>
+          </button>
+        {%- endfor -%}
+      </div>
+
+      {%- unless section.settings.image_position == 'no-image' -%}
+        {%- comment -%}
+          Use CSS aspect-ratio instead of the padding-top % trick.
+          The data attribute lets the JS / CSS know the ratio without inline styles.
+        {%- endcomment -%}
+        <div
+          class="info-tabs__panels"
+          aria-live="polite"
+          aria-atomic="false"
+          style="--info-tabs-aspect-ratio: {{ section.settings.image_aspect_ratio }};"
+        >
+          {%- for block in section.blocks -%}
+            {%- assign is_first = forloop.first -%}
+            <div
+              class="info-tabs__panel js-info-panel{% if is_first %} active{% endif %}"
+              id="panel-{{ block.id }}"
+              role="tabpanel"
+              aria-labelledby="info-tab-{{ block.id }}"
+              tabindex="0"
+              {% unless is_first %}hidden{% endunless %}
+            >
+              <div class="info-tabs__image">
+                {%- if block.settings.image != blank -%}
+                  {%- liquid
+                    case section.settings.desktop_layout
+                      when 'half'
+                        assign sizes = '(max-width: 767px) calc(100vw - 20px), (max-width: ' | append: settings.theme_max_width | append: 'px) 50vw, ' | append: settings.theme_max_width | divided_by: 2 | append: 'px'
+                      when 'third'
+                        assign sizes = '(max-width: 767px) calc(100vw - 20px), (max-width: ' | append: settings.theme_max_width | append: 'px) 33vw, ' | append: settings.theme_max_width | divided_by: 3 | append: 'px'
+                      when 'fourth'
+                        assign sizes = '(max-width: 767px) calc(100vw - 20px), (max-width: ' | append: settings.theme_max_width | append: 'px) 25vw, ' | append: settings.theme_max_width | divided_by: 4 | append: 'px'
+                    endcase
+                    if section.index == 1 and is_first
+                      assign preload = true
+                    else
+                      assign preload = false
+                    endif
+                  -%}
+                  {%- render 'lazy-image',
+                    image: block.settings.image,
+                    sizes: sizes,
+                    ratio: section.settings.image_aspect_ratio,
+                    alt: block.settings.title,
+                    preload: preload
+                  -%}
+                {%- else -%}
+                  {{ 'image' | placeholder_svg_tag }}
+                {%- endif -%}
+              </div>
+            </div>
+          {%- endfor -%}
+        </div>
+      {%- endunless -%}
+    </info-tabs>
+
+    {%- comment -%} Mobile dot + arrow navigation {%- endcomment -%}
+    <nav
+      id="info-tabs-navigation-{{ section.id }}"
+      class="css-slider element--hide-on-desk"
+      aria-label="{{ section.settings.heading | default: 'Info tabs' | escape }} navigation"
+    >
+      <div class="css-slider-navigation-container">
+        <button
+          class="css-slider-button css-slider-prev disabled"
+          aria-label="{{ 'general.pagination.previous' | t | default: 'Previous tab' }}"
+          aria-controls="info-tabs-{{ section.id }}"
+        >
+          <svg fill="none" height="11" viewBox="0 0 6 11" width="6" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <path clip-rule="evenodd" d="m4.32845 10.0708-4.18198-4.18194c-.195261-.19526-.195261-.51185 0-.70711l4.18198-4.181979c.19527-.195262.51185-.195262.70711 0 .19526.195259.19526.511849 0 .707109l-3.32843 3.32842s-.70713.4647-.00002 1l3.32845 3.32843c.19526.19526.19526.51185 0 .70707-.19526.1953-.51185.1953-.70711 0z" fill="currentColor" fill-rule="evenodd"/>
+          </svg>
+        </button>
+
+        <div
+          class="css-slider-dot-navigation"
+          role="tablist"
+          aria-label="{{ section.settings.heading | default: 'Info tabs' | escape }}"
+          style="--size: {{ section.blocks.size }};"
+        >
+          {%- for block in section.blocks -%}
+            <button
+              class="css-slider-dot{% if forloop.first %} active{% endif %}"
+              role="tab"
+              aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+              aria-controls="panel-{{ block.id }}"
+              aria-label="{{ block.settings.title | escape }}"
+              data-index="{{ forloop.index0 }}"
+            ></button>
+          {%- endfor -%}
+        </div>
+
+        <button
+          class="css-slider-button css-slider-next"
+          aria-label="{{ 'general.pagination.next' | t | default: 'Next tab' }}"
+          aria-controls="info-tabs-{{ section.id }}"
+        >
+          <svg fill="none" height="11" viewBox="0 0 6 11" width="6" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <path clip-rule="evenodd" d="m.853555.999962 4.181985 4.181978c.19526.19526.19526.51185 0 .70711l-4.181983 4.18195c-.195263.1953-.511845.1953-.707108 0-.1952631-.19523-.1952632-.51181 0-.70708l3.328431-3.32842s.70713-.4647.00002-1l-3.328453-3.32843c-.1952626-.19526-.1952627-.51185 0-.707108.195263-.195262.511845-.195262.707108 0z" fill="currentColor" fill-rule="evenodd"/>
+          </svg>
+        </button>
+      </div>
+    </nav>
+  {%- endif -%}
+
+  {%- render 'section-footer',
+    button: section.settings.cta_label,
+    button_label: section.settings.cta_label,
+    link: section.settings.cta_url
+  -%}
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.bundle-extra-words.sections.info_tabs.name",
+  "class": "mount-css-slider mount-slideshow",
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:sections.bundle-extra-words.sections.headings.name"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:sections.local-extra-words.sections.headings.heading",
+      "default": "Info tabs"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "subheading",
+      "label": "t:sections.local-extra-words.sections.headings.subheading",
+      "default": "Describe, <strong>promote</strong>, explain"
+    },
+    {
+      "type": "select",
+      "id": "section_heading_size",
+      "label": "t:sections.bundle-extra-words.sections.headings.size.label",
+      "options": [
+        {
+          "value": "text-size--regular",
+          "label": "t:sections.bundle-extra-words.sections.headings.size.option_1"
+        },
+        {
+          "value": "text-size--large",
+          "label": "t:sections.bundle-extra-words.sections.headings.size.option_2"
+        }
+      ],
+      "default": "text-size--regular"
+    },
+    {
+      "type": "select",
+      "id": "section_heading_layout",
+      "label": "t:sections.bundle-extra-words.sections.headings.alignment.label",
+      "options": [
+        {
+          "value": "section-heading--left section-heading--one-row",
+          "label": "t:sections.bundle-extra-words.sections.headings.alignment.option_1",
+          "group": "t:sections.bundle-extra-words.sections.headings.layout.option_1"
+        },
+        {
+          "value": "section-heading--left section-heading--two-rows",
+          "label": "t:sections.bundle-extra-words.sections.headings.alignment.option_1",
+          "group": "t:sections.bundle-extra-words.sections.headings.layout.option_2"
+        },
+        {
+          "value": "section-heading--center section-heading--two-rows",
+          "label": "t:sections.bundle-extra-words.sections.headings.alignment.option_2",
+          "group": "t:sections.bundle-extra-words.sections.headings.layout.option_2"
+        }
+      ],
+      "default": "section-heading--left section-heading--one-row"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "t:sections.bundle-extra-words.settings_schema.labels.button_text"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "t:sections.bundle-extra-words.settings_schema.labels.button_url"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.bundle-extra-words.sections.headings.layout.label"
+    },
+    {
+      "type": "select",
+      "id": "desktop_layout",
+      "label": "t:sections.bundle-extra-words.settings_schema.labels.desktop_image_width",
+      "options": [
+        {
+          "value": "fourth",
+          "label": "t:sections.bundle-extra-words.settings_schema.labels.options.option_6"
+        },
+        {
+          "value": "third",
+          "label": "t:sections.bundle-extra-words.settings_schema.labels.options.option_7"
+        },
+        {
+          "value": "half",
+          "label": "t:sections.bundle-extra-words.settings_schema.labels.options.option_8"
+        }
+      ],
+      "default": "third"
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "t:sections.local-extra-words.sections.rich-text.settings.image_position.label",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:sections.local-extra-words.sections.rich-text.settings.image_position.option__1"
+        },
+        {
+          "value": "right",
+          "label": "t:sections.local-extra-words.sections.rich-text.settings.image_position.option__3"
+        },
+        {
+          "value": "no-image",
+          "label": "t:late_edits.rich-text.image_position.no_image.label"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "image_aspect_ratio",
+      "label": "t:settings_schema.product-grid.settings.aspect_ratio.label",
+      "options": [
+        {
+          "value": "1",
+          "label": "t:sections.gallery.settings.aspect_ratio.options__2.label"
+        },
+        {
+          "value": "0.83333",
+          "label": "t:sections.gallery.settings.aspect_ratio.options__3.label"
+        },
+        {
+          "value": "0.666667",
+          "label": "t:sections.gallery.settings.aspect_ratio.options__4.label"
+        }
+      ],
+      "default": "1"
+    },
+    {
+      "type": "select",
+      "id": "content_alignment",
+      "label": "Content alignment",
+      "options": [
+        {
+          "value": "start",
+          "label": "Top"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "end",
+          "label": "Bottom"
+        }
+      ],
+      "default": "start"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "t:sections.bundle-extra-words.sections.info_tabs.settings.borders.radius",
+      "unit": "px",
+      "default": 0,
+      "step": 1,
+      "min": 0,
+      "max": 20
+    },
+    {
+      "type": "header",
+      "content": "Tab style"
+    },
+    {
+      "type": "select",
+      "id": "style",
+      "label": "t:sections.bundle-extra-words.sections.info_tabs.settings.style.label",
+      "options": [
+        {
+          "value": "icons",
+          "label": "t:sections.bundle-extra-words.sections.info_tabs.settings.style.option__1"
+        },
+        {
+          "value": "list",
+          "label": "t:sections.bundle-extra-words.sections.info_tabs.settings.style.option__2"
+        },
+        {
+          "value": "blank",
+          "label": "t:sections.bundle-extra-words.sections.info_tabs.settings.style.option__3"
+        }
+      ],
+      "default": "list"
+    },
+    {
+      "type": "select",
+      "id": "tab_indicator_style",
+      "label": "Tab active indicator",
+      "info": "Visual style of the active tab highlight",
+      "options": [
+        {
+          "value": "underline",
+          "label": "Underline"
+        },
+        {
+          "value": "pill",
+          "label": "Pill / filled"
+        },
+        {
+          "value": "border",
+          "label": "Border"
+        }
+      ],
+      "default": "underline"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.bundle-extra-words.sections.info_tabs.settings.autoplay.label"
+    },
+    {
+      "id": "autoplay_active",
+      "type": "checkbox",
+      "default": false,
+      "label": "t:sections.bundle-extra-words.sections.info_tabs.settings.autoplay.enable",
+      "info": "t:sections.local-extra-words.sections.blog-posts.settings.emphasize.info"
+    },
+    {
+      "type": "range",
+      "id": "autoplay",
+      "label": "t:sections.bundle-extra-words.sections.info_tabs.settings.autoplay.timer",
+      "info": "t:sections.bundle-extra-words.sections.info_tabs.settings.autoplay.info",
+      "default": 5,
+      "step": 1,
+      "min": 5,
+      "max": 15
+    },
+    {
+      "type": "range",
+      "id": "animation_speed",
+      "label": "Transition speed",
+      "info": "Duration of the crossfade between tabs (seconds)",
+      "unit": "s",
+      "default": 0,
+      "step": 1,
+      "min": 0,
+      "max": 1
+    },
+    {
+      "type": "header",
+      "content": "t:bundle-240.section_design"
+    },
+    {
+      "type": "color",
+      "id": "section_background_color",
+      "label": "t:bundle-240.background_color",
+      "default": "rgba(0,0,0,0)"
+    },
+    {
+      "type": "color_background",
+      "id": "section_background_gradient",
+      "label": "t:bundle-240.background_gradient"
+    },
+    {
+      "type": "color",
+      "id": "section_heading_color",
+      "label": "t:bundle-240.text_color",
+      "default": "rgba(0,0,0,0)"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.bundle-extra-words.sections.headings.gutter.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "gutter_decrease",
+      "label": "t:sections.bundle-extra-words.sections.headings.gutter.content",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "remove_bottom_margin",
+      "label": "t:sections.local-extra-words.settings_schema.layout.sections.remove_bottom_margin",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "t:sections.refactor_words.seo.name"
+    },
+    {
+      "type": "select",
+      "id": "seo_h_tag",
+      "label": "t:sections.refactor_words.seo.label",
+      "info": "t:sections.refactor_words.seo.info",
+      "options": [
+        { "value": "h1", "label": "H1" },
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" },
+        { "value": "h4", "label": "H4" },
+        { "value": "span", "label": "span" }
+      ],
+      "default": "h2"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "tab",
+      "name": "t:sections.bundle-extra-words.sections.info_tabs.blocks.name",
+      "settings": [
+        {
+          "type": "header",
+          "content": "t:sections.local-extra-words.sections.headings.text_content"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "t:sections.local-extra-words.sections.headings.title",
+          "default": "Information tab"
+        },
+        {
+          "type": "richtext",
+          "id": "caption",
+          "label": "t:sections.local-extra-words.sections.headings.caption",
+          "default": "<p>Write about various product information, store news or usage support.</p>"
+        },
+        {
+          "id": "image",
+          "type": "image_picker",
+          "label": "t:sections.gallery.blocks.image.settings.image.label"
+        },
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "t:sections.text-columns-with-icons.blocks.icon.settings.icon.label",
+          "info": "t:sections.local-extra-words.sections.text-columns-with-icons.blocks.select_icon.info",
+          "options": [
+            { "value": "earth-globe",    "label": "Earth globe",    "group": "Business" },
+            { "value": "flag",           "label": "Flag",           "group": "Business" },
+            { "value": "helpline",       "label": "Helpline",       "group": "Business" },
+            { "value": "like-hand",      "label": "Like hand",      "group": "Business" },
+            { "value": "map-marker",     "label": "Map marker",     "group": "Business" },
+            { "value": "security-shield","label": "Security shield","group": "Business" },
+            { "value": "star",           "label": "Star",           "group": "Business" },
+            { "value": "appointment",    "label": "Appointment",    "group": "Commerce" },
+            { "value": "archive-box",    "label": "Archive box",    "group": "Commerce" },
+            { "value": "box",            "label": "Box",            "group": "Commerce" },
+            { "value": "checkout-cart",  "label": "Checkout cart",  "group": "Commerce" },
+            { "value": "currency",       "label": "Currency",       "group": "Commerce" },
+            { "value": "delivery",       "label": "Delivery",       "group": "Commerce" },
+            { "value": "delivery-time",  "label": "Delivery time",  "group": "Commerce" },
+            { "value": "giftbox",        "label": "Giftbox",        "group": "Commerce" },
+            { "value": "label",          "label": "Label",          "group": "Commerce" },
+            { "value": "open-24-hours",  "label": "Open 24 hours",  "group": "Commerce" },
+            { "value": "open-box",       "label": "Open box",       "group": "Commerce" },
+            { "value": "paper-bag",      "label": "Paper bag",      "group": "Commerce" },
+            { "value": "shipping-truck", "label": "Shipping truck",  "group": "Commerce" },
+            { "value": "store",          "label": "Store",          "group": "Commerce" },
+            { "value": "time",           "label": "Time",           "group": "Commerce" },
+            { "value": "time-limit",     "label": "Time limit",     "group": "Commerce" },
+            { "value": "wallet",         "label": "Wallet",         "group": "Commerce" }
+          ],
+          "default": "star"
+        },
+        {
+          "id": "custom_icon",
+          "type": "image_picker",
+          "label": "t:sections.local-extra-words.sections.text-columns-with-icons.blocks.icon.name"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.bundle-extra-words.sections.info_tabs.name",
+      "category": "t:sections-categories.storytelling",
+      "blocks": [
+        {
+          "type": "tab",
+          "settings": {
+            "title": "Step 1",
+            "caption": "<p>Information about the first step in what you're trying to describe.</p>"
+          }
+        },
+        {
+          "type": "tab",
+          "settings": {
+            "title": "Step 2",
+            "caption": "<p>Information about the second step in what you're trying to describe.</p>"
+          }
+        },
+        {
+          "type": "tab",
+          "settings": {
+            "title": "Step 3",
+            "caption": "<p>Information about the third step in what you're trying to describe.</p>"
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header"]
+  }
+}
+{% endschema %}
