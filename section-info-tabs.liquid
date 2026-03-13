@@ -1,19 +1,3 @@
-{{/*
-  section-info-tabs.liquid — Modernized Info Tabs Section
-  Key improvements over original:
-    - Full ARIA tab pattern (role=tablist/tab/tabpanel, aria-selected, aria-controls, aria-labelledby)
-    - <button> elements replace <span> for proper keyboard & screen-reader semantics
-    - prefers-reduced-motion: autoplay and animations disabled when user prefers it
-    - fetchpriority="high" + decoding="async" on images; eager-load for LCP candidate
-    - CSS aspect-ratio property replaces padding-top % hack
-    - CSS custom properties for all dynamic values (no scattered inline styles)
-    - hidden attribute on inactive panels (a11y) — CSS class alone is insufficient
-    - BEM naming unified to double-underscore throughout
-    - New schema settings: tab_indicator_style, animation_speed, content_alignment, mobile_columns
-    - Navigation buttons carry aria-label for screen readers
-    - Pause-on-focus in addition to pause-on-hover
-*/}}
-
 <div
   class="
     container--large
