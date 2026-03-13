@@ -28,7 +28,7 @@
       else
         assign autoplay_setting = section.settings.autoplay_active
       endif
-      assign transition_ms = section.settings.animation_speed | times: 1000 | round
+      assign transition_ms = section.settings.animation_speed
     -%}
 
     {%- comment -%} Section-scoped CSS custom properties {%- endcomment -%}
@@ -50,7 +50,7 @@
 
       #info-tabs-{{ section.id }} {
         --info-tabs-border-radius: {{ section.settings.border_radius }}px;
-        --info-tabs-transition-duration: {{ section.settings.animation_speed }}s;
+        --info-tabs-transition-duration: {{ section.settings.animation_speed }}ms;
         --info-tabs-autoplay-duration: {{ section.settings.autoplay }}s;
       }
 
@@ -483,12 +483,12 @@
       "type": "range",
       "id": "animation_speed",
       "label": "Transition speed",
-      "info": "Duration of the crossfade between tabs (seconds)",
-      "unit": "s",
+      "info": "Duration of the crossfade between tabs",
+      "unit": "ms",
       "default": 0,
-      "step": 1,
+      "step": 100,
       "min": 0,
-      "max": 1
+      "max": 600
     },
     {
       "type": "header",
