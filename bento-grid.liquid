@@ -5,23 +5,19 @@
 
 <style>
   #shopify-section-{{ section.id }} {
-    --card-bg:           {{ section.settings.card_bg_color }};
-    --color-headline:    {{ section.settings.headline_color }};
-    --color-subline:     {{ section.settings.subline_color }};
-    --color-highlight:   {{ section.settings.highlight_color }};
-    --card-radius:       {{ section.settings.card_radius }}px;
-    --card-padding:      {{ section.settings.card_padding }}px;
-    --image-width:       {{ section.settings.image_width }}%;
-    --btn-bg:            {{ section.settings.btn_bg_color }};
-    --btn-icon-color:    {{ section.settings.btn_icon_color }};
-    --btn-bg-hover:      {{ section.settings.btn_bg_hover_color }};
-    --btn-icon-hover:    {{ section.settings.btn_icon_hover_color }};
-    --section-bg:        {{ section.settings.section_bg_color }};
-    --grid-gap:          {{ section.settings.grid_gap }}px;
+    --card-bg:        {{ section.settings.card_bg_color }};
+    --color-highlight: {{ section.settings.highlight_color }};
+    --card-radius:    {{ section.settings.card_radius }}px;
+    --card-padding:   {{ section.settings.card_padding }}px;
+    --image-width:    {{ section.settings.image_width }}%;
+    --btn-bg:         {{ section.settings.btn_bg_color }};
+    --btn-icon-color: {{ section.settings.btn_icon_color }};
+    --btn-bg-hover:   {{ section.settings.btn_bg_hover_color }};
+    --btn-icon-hover: {{ section.settings.btn_icon_hover_color }};
+    --grid-gap:       {{ section.settings.grid_gap }}px;
   }
 
   .bento-grid-section {
-    background-color: var(--section-bg);
     padding: {{ section.settings.section_padding_v }}px {{ section.settings.section_padding_h }}px;
   }
 
@@ -55,7 +51,7 @@
     font-size: clamp(1.4rem, 2.5vw, 2rem);
     font-weight: 700;
     line-height: 1.2;
-    color: var(--color-headline);
+    color: var(--color-text-main);
     margin: 0 0 0.5rem;
   }
 
@@ -66,7 +62,7 @@
   .bento-card__subline {
     font-size: clamp(0.85rem, 1.5vw, 1rem);
     line-height: 1.5;
-    color: var(--color-subline);
+    color: var(--color-secondary-text-main);
     margin: 0;
   }
 
@@ -76,7 +72,7 @@
     margin-top: 1.5rem;
   }
 
-  /* Round icon cart/link button */
+  /* Round icon link button */
   .bento-card__btn {
     display: inline-flex;
     align-items: center;
@@ -146,14 +142,14 @@
     font-size: clamp(1.6rem, 3.5vw, 2.8rem);
     font-weight: 700;
     line-height: 1.15;
-    color: var(--color-headline);
+    color: var(--color-text-main);
     margin: 0 0 0.4em;
   }
 
-  .bento-grid__subline {
+  .bento-grid__subheading {
     font-size: clamp(0.9rem, 1.8vw, 1.1rem);
     line-height: 1.6;
-    color: var(--color-subline);
+    color: var(--color-secondary-text-main);
     margin: 0;
   }
 
@@ -186,10 +182,11 @@
         </{{ section.settings.seo_h_tag }}>
       {%- endif -%}
       {%- if section.settings.subheading != blank -%}
-        <p class="bento-grid__subline">{{ section.settings.subheading }}</p>
+        <p class="bento-grid__subheading">{{ section.settings.subheading }}</p>
       {%- endif -%}
     </div>
   {%- endif -%}
+
   <div class="bento-grid">
     {% for block in section.blocks %}
       {% case block.type %}
@@ -247,6 +244,33 @@
     {% endfor %}
   </div>
 </section>
+
+{%- if section.settings.section_background_color != 'rgba(0,0,0,0)' -%}
+  {% style %}
+    #shopify-section-{{ section.id }} {
+      background-color: {{ section.settings.section_background_color }};
+    }
+  {% endstyle %}
+{%- endif -%}
+
+{%- if section.settings.section_background_gradient != blank -%}
+  {% style %}
+    #shopify-section-{{ section.id }} {
+      background-image: {{ section.settings.section_background_gradient }};
+    }
+  {% endstyle %}
+{%- endif -%}
+
+{%- if section.settings.section_heading_color != 'rgba(0,0,0,0)' -%}
+  {% style %}
+    #shopify-section-{{ section.id }} {
+      --color-text-main: {{ section.settings.section_heading_color }};
+      --color-secondary-text-main: {{ section.settings.section_heading_color | color_modify: 'alpha', 0.6 }};
+      --color-borders-forms-primary: {{ section.settings.section_heading_color | color_modify: 'alpha', 0.3 }};
+      --color-borders-main: {{ section.settings.section_heading_color | color_modify: 'alpha', 0.1 }};
+    }
+  {% endstyle %}
+{%- endif -%}
 
 {% schema %}
 {
@@ -307,12 +331,6 @@
       "content": "Section Layout"
     },
     {
-      "type": "color",
-      "id": "section_bg_color",
-      "label": "Section background color",
-      "default": "#f5f3ef"
-    },
-    {
       "type": "range",
       "id": "section_padding_v",
       "label": "Section vertical padding (px)",
@@ -366,22 +384,6 @@
       "max": 80,
       "step": 4,
       "default": 32
-    },
-    {
-      "type": "header",
-      "content": "Typography Colors"
-    },
-    {
-      "type": "color",
-      "id": "headline_color",
-      "label": "Headline color",
-      "default": "#1a1a1a"
-    },
-    {
-      "type": "color",
-      "id": "subline_color",
-      "label": "Subline / body color",
-      "default": "#555555"
     },
     {
       "type": "color",
@@ -438,6 +440,27 @@
       "max": 80,
       "step": 1,
       "default": 42
+    },
+    {
+      "type": "header",
+      "content": "t:bundle-240.section_design"
+    },
+    {
+      "type": "color",
+      "id": "section_background_color",
+      "label": "t:bundle-240.background_color",
+      "default": "rgba(0,0,0,0)"
+    },
+    {
+      "type": "color_background",
+      "id": "section_background_gradient",
+      "label": "t:bundle-240.background_gradient"
+    },
+    {
+      "type": "color",
+      "id": "section_heading_color",
+      "label": "t:bundle-240.text_color",
+      "default": "rgba(0,0,0,0)"
     }
   ],
   "blocks": [
