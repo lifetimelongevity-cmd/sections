@@ -129,6 +129,7 @@
     padding-bottom: {{ section.settings.padding_bottom }}px;
   }
 
+  /* ---- Header ---- */
   .section-{{ section.id }}-cg .cg-header {
     border-top: 1px solid currentColor;
     padding-top: 2rem;
@@ -137,14 +138,20 @@
 
   .section-{{ section.id }}-cg .cg-heading {
     margin: 0 0 0.25rem;
+    font-family: var(--font-heading-family);
+    font-weight: var(--font-heading-weight);
+    font-style: var(--font-heading-style);
     font-size: {{ section.settings.heading_size }}px;
-    font-weight: 700;
-    line-height: 1.1;
+    line-height: var(--line-height-heading, 1.1);
+    letter-spacing: var(--letter-spacing-heading, 0);
   }
 
   .section-{{ section.id }}-cg .cg-subheading {
     margin: 0;
-    font-size: 0.875rem;
+    font-family: var(--font-body-family);
+    font-weight: var(--font-body-weight);
+    font-style: var(--font-body-style);
+    font-size: calc(var(--font-body-size, 1rem) * 0.875);
     opacity: 0.85;
   }
 
@@ -168,8 +175,10 @@
     right: 0.3rem;
     background: #fff;
     padding: 0.15rem 0.35rem;
-    font-size: 0.5rem;
-    font-weight: 600;
+    font-family: var(--font-body-family);
+    font-weight: var(--font-body-weight);
+    font-style: var(--font-body-style);
+    font-size: calc(var(--font-body-size, 1rem) * 0.5);
     letter-spacing: 0.1em;
     text-transform: uppercase;
     line-height: 1.4;
@@ -178,7 +187,7 @@
 
   @media (min-width: 750px) {
     .section-{{ section.id }}-cg .cg-badge {
-      font-size: 0.7rem;
+      font-size: calc(var(--font-body-size, 1rem) * 0.7);
       padding: 0.25rem 0.5rem;
       top: 0.5rem;
       right: 0.5rem;
@@ -198,26 +207,35 @@
 
   .section-{{ section.id }}-cg .cg-card__title {
     margin: 0 0 0.25rem;
-    font-size: 1.1rem;
-    font-weight: 500;
-    line-height: 1;
+    font-family: var(--font-heading-family);
+    font-weight: var(--font-heading-weight);
+    font-style: var(--font-heading-style);
+    font-size: calc(var(--font-body-size, 1rem) * 1.1);
+    line-height: var(--line-height-heading, 1.1);
+    letter-spacing: var(--letter-spacing-heading, 0);
   }
 
   @media (min-width: 750px) {
     .section-{{ section.id }}-cg .cg-card__title {
-      font-size: 1.5rem;
+      font-size: calc(var(--font-body-size, 1rem) * 1.5);
     }
   }
 
   .section-{{ section.id }}-cg .cg-card__subline {
     margin: 0 0 0.4rem;
-    font-size: 0.7rem;
+    font-family: var(--font-body-family);
+    font-weight: var(--font-body-weight);
+    font-style: var(--font-body-style);
+    font-size: calc(var(--font-body-size, 1rem) * 0.75);
     line-height: 1.2;
   }
 
   .section-{{ section.id }}-cg .cg-card__price {
     margin: 0;
-    font-size: 0.7rem;
+    font-family: var(--font-body-family);
+    font-weight: var(--font-body-weight);
+    font-style: var(--font-body-style);
+    font-size: calc(var(--font-body-size, 1rem) * 0.75);
     line-height: 1.2;
   }
 
