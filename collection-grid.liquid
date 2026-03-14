@@ -1,121 +1,259 @@
-{{ 'collection-grid.css' | asset_url | stylesheet_tag }}
+{%- liquid
+  case section.settings.columns_desktop
+    when '2'
+      assign grid_class = 'grid-2 grid-palm-1'
+    when '3'
+      assign grid_class = 'grid-3 grid-portable-2 grid-palm-2'
+    else
+      assign grid_class = 'grid-4 grid-laptop-3 grid-palm-2'
+  endcase
+-%}
 
-<section
-  id="shopify-section-{{ section.id }}"
-  class="collection-grid-section section-{{ section.id }}"
-  style="
-    background-color: {{ section.settings.section_bg_color }};
-    padding-top: {{ section.settings.padding_top }}px;
-    padding-bottom: {{ section.settings.padding_bottom }}px;
-  "
+<div
+  class="container--large container--vertical-space section-{{ section.id }}-cg"
+  style="background-color: {{ section.settings.section_bg_color }};"
 >
-  <div class="collection-grid__inner page-width">
 
-    {%- if section.settings.heading != blank or section.settings.subheading != blank -%}
-      <div class="collection-grid__header">
-        {%- if section.settings.heading != blank -%}
-          <h2 class="collection-grid__heading">{{ section.settings.heading | escape }}</h2>
+  {%- if section.settings.heading != blank or section.settings.subheading != blank -%}
+    <div class="cg-header">
+      {%- if section.settings.heading != blank -%}
+        <h2 class="cg-heading">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="cg-subheading">{{ section.settings.subheading | escape }}</p>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  <div class="grid grid--layout {{ grid_class }}">
+
+    {%- for block in section.blocks -%}
+      {%- assign product      = block.settings.product -%}
+      {%- assign card_bg      = block.settings.card_bg_color -%}
+      {%- assign text_color   = block.settings.text_color -%}
+      {%- assign cmp_color    = block.settings.compare_price_color -%}
+
+      {%- assign card_href = '#' -%}
+      {%- if product != blank -%}
+        {%- assign card_href = product.url -%}
+      {%- elsif block.settings.custom_url != blank -%}
+        {%- assign card_href = block.settings.custom_url -%}
+      {%- endif -%}
+
+      <a
+        href="{{ card_href }}"
+        class="cg-card"
+        style="background-color: {{ card_bg }};"
+        {{ block.shopify_attributes }}
+      >
+        {%- if block.settings.badge != blank -%}
+          <span class="cg-badge" style="color: {{ card_bg }};">
+            {{ block.settings.badge | escape }}
+          </span>
         {%- endif -%}
-        {%- if section.settings.subheading != blank -%}
-          <p class="collection-grid__subheading">{{ section.settings.subheading | escape }}</p>
-        {%- endif -%}
-      </div>
-    {%- endif -%}
 
-    <div class="collection-grid__grid collection-grid__grid--{{ section.settings.columns_desktop }}-col">
-      {%- assign img_sizes = '(min-width: 750px) calc((100vw - 10rem) / ' | append: section.settings.columns_desktop | append: '), calc(50vw - 1.5rem)' -%}
-      {%- for block in section.blocks -%}
-        {%- assign product = block.settings.product -%}
-        {%- assign card_bg = block.settings.card_bg_color -%}
-        {%- assign text_color = block.settings.text_color -%}
-        {%- assign compare_color = block.settings.compare_price_color -%}
+        <div class="cg-card__body">
+          <h3 class="cg-card__title" style="color: {{ text_color }};">
+            {%- if product != blank -%}
+              {{ product.title | escape }}
+            {%- elsif block.settings.custom_title != blank -%}
+              {{ block.settings.custom_title | escape }}
+            {%- endif -%}
+          </h3>
 
-        <a
-          href="{%- if product != blank -%}{{ product.url }}{%- elsif block.settings.custom_url != blank -%}{{ block.settings.custom_url }}{%- else -%}#{%- endif -%}"
-          class="collection-grid__card collection-grid__card--{{ block.id }}"
-          style="background-color: {{ card_bg }};"
-          {{ block.shopify_attributes }}
-        >
-          {%- if block.settings.badge != blank -%}
-            <span class="collection-grid__badge" style="color: {{ card_bg }};">
-              {{ block.settings.badge | escape }}
-            </span>
+          {%- assign subline = block.settings.subline -%}
+          {%- if subline == blank and product != blank -%}
+            {%- assign subline = product.description | strip_html | truncate: 60 -%}
+          {%- endif -%}
+          {%- if subline != blank -%}
+            <p class="cg-card__subline" style="color: {{ text_color }};">{{ subline }}</p>
           {%- endif -%}
 
-          <div class="collection-grid__card-body" style="color: {{ text_color }};">
-            <h3 class="collection-grid__card-title" style="color: {{ text_color }};">
-              {%- if product != blank -%}
-                {{ product.title | escape }}
-              {%- elsif block.settings.custom_title != blank -%}
-                {{ block.settings.custom_title }}
+          {%- if product != blank -%}
+            <p class="cg-card__price" style="color: {{ text_color }};">
+              {%- if product.compare_at_price > product.price -%}
+                From {{ product.price | money_without_trailing_zeros }}
+                <s style="color: {{ cmp_color }};">{{ product.compare_at_price | money_without_trailing_zeros }}</s>
+              {%- else -%}
+                {{ product.price | money_without_trailing_zeros }}
               {%- endif -%}
-            </h3>
+            </p>
+          {%- endif -%}
+        </div>
 
-            {%- assign subline = block.settings.subline -%}
-            {%- if subline == blank and product != blank -%}
-              {%- assign subline = product.metafields.custom.subline | default: product.description | strip_html | truncate: 60 -%}
-            {%- endif -%}
-            {%- if subline != blank -%}
-              <p class="collection-grid__card-subline" style="color: {{ text_color }};">{{ subline }}</p>
-            {%- endif -%}
+        <div class="cg-card__image-wrap">
+          {%- if product != blank and product.featured_image != blank -%}
+            <img
+              src="{{ product.featured_image | image_url: width: 1100 }}"
+              srcset="
+                {{ product.featured_image | image_url: width: 550 }} 550w,
+                {{ product.featured_image | image_url: width: 750 }} 750w,
+                {{ product.featured_image | image_url: width: 1100 }} 1100w
+              "
+              sizes="(min-width: 990px) calc(100vw / {{ section.settings.columns_desktop }}), 50vw"
+              alt="{{ product.featured_image.alt | escape }}"
+              loading="lazy"
+              width="{{ product.featured_image.width }}"
+              height="{{ product.featured_image.height }}"
+              class="cg-card__image"
+            >
+          {%- elsif block.settings.custom_image != blank -%}
+            <img
+              src="{{ block.settings.custom_image | image_url: width: 1100 }}"
+              srcset="
+                {{ block.settings.custom_image | image_url: width: 550 }} 550w,
+                {{ block.settings.custom_image | image_url: width: 750 }} 750w,
+                {{ block.settings.custom_image | image_url: width: 1100 }} 1100w
+              "
+              sizes="(min-width: 990px) calc(100vw / {{ section.settings.columns_desktop }}), 50vw"
+              alt="{{ block.settings.custom_title | escape }}"
+              loading="lazy"
+              width="{{ block.settings.custom_image.width }}"
+              height="{{ block.settings.custom_image.height }}"
+              class="cg-card__image"
+            >
+          {%- else -%}
+            {{ 'product-1' | placeholder_svg_tag: 'cg-card__image cg-card__image--placeholder' }}
+          {%- endif -%}
+        </div>
+      </a>
 
-            {%- if product != blank -%}
-              <p class="collection-grid__card-price" style="color: {{ text_color }};">
-                {%- if product.compare_at_price > product.price -%}
-                  <span>From {{ product.price | money_without_trailing_zeros }}</span>
-                  <s style="color: {{ compare_color }};">{{ product.compare_at_price | money_without_trailing_zeros }}</s>
-                {%- else -%}
-                  <span>{{ product.price | money_without_trailing_zeros }}</span>
-                {%- endif -%}
-              </p>
-            {%- endif -%}
-          </div>
-
-          <div class="collection-grid__card-image-wrap">
-            {%- if product != blank and product.featured_image != blank -%}
-              {{
-                product.featured_image
-                | image_url: width: 1100
-                | image_tag:
-                  loading: 'lazy',
-                  widths: '550, 750, 1100',
-                  sizes: img_sizes,
-                  class: 'collection-grid__card-image',
-                  alt: product.featured_image.alt | escape
-              }}
-            {%- elsif block.settings.custom_image != blank -%}
-              {{
-                block.settings.custom_image
-                | image_url: width: 1100
-                | image_tag:
-                  loading: 'lazy',
-                  widths: '550, 750, 1100',
-                  sizes: img_sizes,
-                  class: 'collection-grid__card-image',
-                  alt: block.settings.custom_title | escape
-              }}
-            {%- else -%}
-              {{ 'product-1' | placeholder_svg_tag: 'collection-grid__card-image collection-grid__card-image--placeholder' }}
-            {%- endif -%}
-          </div>
-        </a>
-      {%- endfor -%}
-    </div>
-
+    {%- endfor -%}
   </div>
-</section>
+
+</div>
 
 <style>
-  .section-{{ section.id }} .collection-grid__heading {
+  .section-{{ section.id }}-cg {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+
+  .section-{{ section.id }}-cg .cg-header {
+    border-top: 1px solid currentColor;
+    padding-top: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-{{ section.id }}-cg .cg-heading {
+    margin: 0 0 0.25rem;
     font-size: {{ section.settings.heading_size }}px;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  .section-{{ section.id }}-cg .cg-subheading {
+    margin: 0;
+    font-size: 0.875rem;
+    opacity: 0.85;
+  }
+
+  /* ---- Card ---- */
+  .section-{{ section.id }}-cg .cg-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    padding: 1.75rem 0.5rem 0;
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  /* ---- Badge ---- */
+  .section-{{ section.id }}-cg .cg-badge {
+    position: absolute;
+    top: 0.3rem;
+    right: 0.3rem;
+    background: #fff;
+    padding: 0.15rem 0.35rem;
+    font-size: 0.5rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+
+  @media (min-width: 750px) {
+    .section-{{ section.id }}-cg .cg-badge {
+      font-size: 0.7rem;
+      padding: 0.25rem 0.5rem;
+      top: 0.5rem;
+      right: 0.5rem;
+    }
+  }
+
+  /* ---- Card body ---- */
+  .section-{{ section.id }}-cg .cg-card__body {
+    margin-bottom: 0.75rem;
+  }
+
+  @media (min-width: 750px) {
+    .section-{{ section.id }}-cg .cg-card__body {
+      margin-bottom: 2rem;
+    }
+  }
+
+  .section-{{ section.id }}-cg .cg-card__title {
+    margin: 0 0 0.25rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  @media (min-width: 750px) {
+    .section-{{ section.id }}-cg .cg-card__title {
+      font-size: 1.5rem;
+    }
+  }
+
+  .section-{{ section.id }}-cg .cg-card__subline {
+    margin: 0 0 0.4rem;
+    font-size: 0.7rem;
+    line-height: 1.2;
+  }
+
+  .section-{{ section.id }}-cg .cg-card__price {
+    margin: 0;
+    font-size: 0.7rem;
+    line-height: 1.2;
+  }
+
+  .section-{{ section.id }}-cg .cg-card__price s {
+    text-decoration: line-through;
+    margin-left: 0.2rem;
+  }
+
+  /* ---- Image ---- */
+  .section-{{ section.id }}-cg .cg-card__image-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+  }
+
+  .section-{{ section.id }}-cg .cg-card__image {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    transition: transform 0.2s ease;
+  }
+
+  .section-{{ section.id }}-cg .cg-card:hover .cg-card__image {
+    transform: scale(1.08);
+  }
+
+  .section-{{ section.id }}-cg .cg-card__image--placeholder {
+    opacity: 0.25;
+    max-width: 200px;
   }
 </style>
 
 {% schema %}
 {
   "name": "Collection Grid",
-  "tag": "section",
-  "class": "section",
+  "class": "container--remove-margin-before",
   "max_blocks": 12,
   "settings": [
     {
@@ -211,11 +349,11 @@
           "type": "text",
           "id": "subline",
           "label": "Subline / tagline",
-          "info": "Short descriptor shown below the title. Falls back to product description if left blank."
+          "info": "Short descriptor below the title. Falls back to product description if blank."
         },
         {
           "type": "header",
-          "content": "Override (no product selected)"
+          "content": "Manual override (when no product is set)"
         },
         {
           "type": "text",
@@ -262,7 +400,7 @@
           "type": "text",
           "id": "badge",
           "label": "Badge text",
-          "info": "e.g. NEW, SALE, LIMITED TIME"
+          "info": "e.g. NEW, SALE, LIMITED TIME ONLY"
         }
       ]
     }
