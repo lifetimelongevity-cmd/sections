@@ -54,7 +54,7 @@
       <a
         href="{{ card_href }}"
         class="cg-card{% if use_bg_img %} cg-card--bg{% endif %}"
-        style="background-color: {{ card_bg }}; border-radius: {{ section.settings.card_border_radius }}px;{% if use_bg_img %} min-height: {{ section.settings.card_image_height }}px;{% endif %}"
+        style="background-color: {{ card_bg }}; border-radius: {{ section.settings.card_border_radius }}px;"
         {{ block.shopify_attributes }}
       >
 
@@ -182,6 +182,11 @@
     opacity: 0.85;
   }
 
+  /* Equalize row heights for all cards */
+  .section-{{ section.id }}-cg .grid {
+    align-items: stretch;
+  }
+
   /* ---- Card (default) ---- */
   .section-{{ section.id }}-cg .cg-card {
     position: relative;
@@ -199,6 +204,9 @@
   .section-{{ section.id }}-cg .cg-card--bg {
     padding: 0;
     justify-content: flex-end;
+    /* min-height acts as a floor when this card is alone in a row;
+       align-items: stretch on the grid takes over when siblings are taller */
+    min-height: {{ section.settings.card_image_height }}px;
   }
 
   .section-{{ section.id }}-cg .cg-card__bg-image {
