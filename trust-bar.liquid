@@ -16,13 +16,8 @@
     </div>
 
     <div class="trust-bar__cell" role="listitem">
-      <div class="trust-bar__icon trust-bar__icon--star" aria-hidden="true">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M8 2l1.545 3.13 3.455.502-2.5 2.437.59 3.44L8 9.885l-3.09 1.624.59-3.44L3 5.632l3.455-.502L8 2z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/>
-        </svg>
-      </div>
       <div class="trust-bar__text">
-        <span class="trust-bar__label">{{ section.settings.signal_2_label | escape }}</span>
+        <span class="trust-bar__label trust-bar__label--stars"><span class="trust-bar__stars" aria-hidden="true">★★★★★</span> {{ section.settings.signal_2_label | escape }}</span>
         <span class="trust-bar__value">{{ section.settings.signal_2_value | escape }}</span>
       </div>
     </div>
@@ -87,7 +82,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 12px 16px;
+    padding: 10px 16px;
     background: var(--color-background);
     min-width: 0;
   }
@@ -108,7 +103,7 @@
     color: rgba(var(--color-foreground), 0.55);
   }
 
-  .trust-bar-{{ section.id }} .trust-bar__icon--star {
+  .trust-bar-{{ section.id }} .trust-bar__stars {
     color: #BA7517;
   }
 
@@ -195,7 +190,7 @@
       "type": "text",
       "id": "signal_1_value",
       "label": "Signal 1 Wert",
-      "default": "RTL · SAT1 · ARD"
+      "default": "RTL · SAT1 · SWR1"
     },
     {
       "type": "header",
