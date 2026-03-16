@@ -205,6 +205,9 @@
   'use strict';
 
   var SELF_ID = 'shopify-section-{{ section.id }}';
+
+  // Defer until the full DOM is parsed so sections below this one are available.
+  function init() {
   var AUTO    = {{ section.settings.detect_auto | json }};
   var SEL     = {{ section.settings.detect_target | default: '.cg-heading' | json }};
 
@@ -305,6 +308,13 @@
 
   list.addEventListener('scroll', updateHint, { passive: true });
   updateHint();
+  } // end init()
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();
 </script>
 
