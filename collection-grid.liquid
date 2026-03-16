@@ -28,10 +28,11 @@
   <div class="grid grid--layout {{ grid_class }}">
 
     {%- for block in section.blocks -%}
-      {%- assign product      = block.settings.product -%}
-      {%- assign card_bg      = block.settings.card_bg_color -%}
-      {%- assign text_color   = block.settings.text_color -%}
-      {%- assign cmp_color    = block.settings.compare_price_color -%}
+      {%- assign product    = block.settings.product -%}
+      {%- assign card_bg    = block.settings.card_bg_color -%}
+      {%- assign text_color = block.settings.text_color -%}
+      {%- assign cmp_color  = block.settings.compare_price_color -%}
+      {%- assign use_bg_img = block.settings.image_as_background -%}
 
       {%- assign card_href = '#' -%}
       {%- if product != blank -%}
@@ -40,12 +41,41 @@
         {%- assign card_href = block.settings.custom_url -%}
       {%- endif -%}
 
+      {%- comment -%} Resolve the image object once for reuse {%- endcomment -%}
+      {%- assign card_image = block.settings.custom_image -%}
+      {%- if card_image == blank and product != blank -%}
+        {%- assign card_image = product.featured_image -%}
+      {%- endif -%}
+      {%- assign card_image_alt = block.settings.custom_title | escape -%}
+      {%- if card_image_alt == blank and product != blank -%}
+        {%- assign card_image_alt = product.featured_image.alt | escape -%}
+      {%- endif -%}
+
       <a
         href="{{ card_href }}"
-        class="cg-card"
-        style="background-color: {{ card_bg }}; border-radius: {{ section.settings.card_border_radius }}px;"
+        class="cg-card{% if use_bg_img %} cg-card--bg{% endif %}"
+        style="background-color: {{ card_bg }}; border-radius: {{ section.settings.card_border_radius }}px;{% if use_bg_img %} min-height: {{ section.settings.card_image_height }}px;{% endif %}"
         {{ block.shopify_attributes }}
       >
+
+        {%- if use_bg_img and card_image != blank -%}
+          <img
+            src="{{ card_image | image_url: width: 1100 }}"
+            srcset="
+              {{ card_image | image_url: width: 550 }} 550w,
+              {{ card_image | image_url: width: 750 }} 750w,
+              {{ card_image | image_url: width: 1100 }} 1100w
+            "
+            sizes="(min-width: 990px) calc(100vw / {{ section.settings.columns_desktop }}), 50vw"
+            alt="{{ card_image_alt }}"
+            loading="lazy"
+            width="{{ card_image.width }}"
+            height="{{ card_image.height }}"
+            class="cg-card__bg-image"
+          >
+          <span class="cg-card__overlay" aria-hidden="true"></span>
+        {%- endif -%}
+
         {%- if block.settings.badge != blank -%}
           <span class="cg-badge" style="color: {{ card_bg }};">
             {{ block.settings.badge | escape }}
@@ -79,43 +109,40 @@
               {%- endif -%}
             </p>
           {%- endif -%}
-        </div>
 
-        <div class="cg-card__image-wrap">
-          {%- if block.settings.custom_image != blank -%}
-            <img
-              src="{{ block.settings.custom_image | image_url: width: 1100 }}"
-              srcset="
-                {{ block.settings.custom_image | image_url: width: 550 }} 550w,
-                {{ block.settings.custom_image | image_url: width: 750 }} 750w,
-                {{ block.settings.custom_image | image_url: width: 1100 }} 1100w
-              "
-              sizes="(min-width: 990px) calc(100vw / {{ section.settings.columns_desktop }}), 50vw"
-              alt="{{ block.settings.custom_title | escape }}"
-              loading="lazy"
-              width="{{ block.settings.custom_image.width }}"
-              height="{{ block.settings.custom_image.height }}"
-              class="cg-card__image"
+          {%- if block.settings.button_label != blank -%}
+            <span
+              class="cg-card__btn"
+              style="background-color: {{ block.settings.button_bg_color }}; color: {{ block.settings.button_text_color }};"
             >
-          {%- elsif product != blank and product.featured_image != blank -%}
-            <img
-              src="{{ product.featured_image | image_url: width: 1100 }}"
-              srcset="
-                {{ product.featured_image | image_url: width: 550 }} 550w,
-                {{ product.featured_image | image_url: width: 750 }} 750w,
-                {{ product.featured_image | image_url: width: 1100 }} 1100w
-              "
-              sizes="(min-width: 990px) calc(100vw / {{ section.settings.columns_desktop }}), 50vw"
-              alt="{{ product.featured_image.alt | escape }}"
-              loading="lazy"
-              width="{{ product.featured_image.width }}"
-              height="{{ product.featured_image.height }}"
-              class="cg-card__image"
-            >
-          {%- else -%}
-            {{ 'product-1' | placeholder_svg_tag: 'cg-card__image cg-card__image--placeholder' }}
+              {{ block.settings.button_label | escape }}
+            </span>
           {%- endif -%}
         </div>
+
+        {%- unless use_bg_img -%}
+          <div class="cg-card__image-wrap">
+            {%- if card_image != blank -%}
+              <img
+                src="{{ card_image | image_url: width: 1100 }}"
+                srcset="
+                  {{ card_image | image_url: width: 550 }} 550w,
+                  {{ card_image | image_url: width: 750 }} 750w,
+                  {{ card_image | image_url: width: 1100 }} 1100w
+                "
+                sizes="(min-width: 990px) calc(100vw / {{ section.settings.columns_desktop }}), 50vw"
+                alt="{{ card_image_alt }}"
+                loading="lazy"
+                width="{{ card_image.width }}"
+                height="{{ card_image.height }}"
+                class="cg-card__image"
+              >
+            {%- else -%}
+              {{ 'product-1' | placeholder_svg_tag: 'cg-card__image cg-card__image--placeholder' }}
+            {%- endif -%}
+          </div>
+        {%- endunless -%}
+
       </a>
 
     {%- endfor -%}
@@ -155,7 +182,7 @@
     opacity: 0.85;
   }
 
-  /* ---- Card ---- */
+  /* ---- Card (default) ---- */
   .section-{{ section.id }}-cg .cg-card {
     position: relative;
     display: flex;
@@ -168,11 +195,49 @@
     color: inherit;
   }
 
+  /* ---- Card – background-image mode ---- */
+  .section-{{ section.id }}-cg .cg-card--bg {
+    padding: 0;
+    justify-content: flex-end;
+  }
+
+  .section-{{ section.id }}-cg .cg-card__bg-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    transition: transform 0.35s ease;
+  }
+
+  .section-{{ section.id }}-cg .cg-card--bg:hover .cg-card__bg-image {
+    transform: scale(1.05);
+  }
+
+  /* gradient overlay so text stays readable */
+  .section-{{ section.id }}-cg .cg-card__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.1) 55%, transparent 100%);
+    pointer-events: none;
+  }
+
+  /* card body in bg mode sits on top of the overlay */
+  .section-{{ section.id }}-cg .cg-card--bg .cg-card__body {
+    position: relative;
+    z-index: 1;
+    padding: 1.25rem 1.25rem 1.5rem;
+    margin-bottom: 0;
+  }
+
   /* ---- Badge ---- */
   .section-{{ section.id }}-cg .cg-badge {
     position: absolute;
     top: 0.3rem;
     right: 0.3rem;
+    z-index: 2;
     background: #fff;
     padding: 0.15rem 0.35rem;
     font-family: var(--font-body-family);
@@ -203,6 +268,10 @@
     .section-{{ section.id }}-cg .cg-card__body {
       margin-bottom: 2rem;
     }
+
+    .section-{{ section.id }}-cg .cg-card--bg .cg-card__body {
+      margin-bottom: 0;
+    }
   }
 
   .section-{{ section.id }}-cg .cg-card__title {
@@ -226,7 +295,7 @@
     font-family: var(--font-body-family);
     font-weight: var(--font-body-weight);
     font-style: var(--font-body-style);
-    font-size: calc(var(--font-body-size, 1rem) * 0.75);
+    font-size: calc(var(--font-body-size, 1rem) * 0.9);
     line-height: 1.2;
   }
 
@@ -235,7 +304,7 @@
     font-family: var(--font-body-family);
     font-weight: var(--font-body-weight);
     font-style: var(--font-body-style);
-    font-size: calc(var(--font-body-size, 1rem) * 0.75);
+    font-size: calc(var(--font-body-size, 1rem));
     line-height: 1.2;
   }
 
@@ -244,7 +313,26 @@
     margin-left: 0.2rem;
   }
 
-  /* ---- Image ---- */
+  /* ---- CTA Button ---- */
+  .section-{{ section.id }}-cg .cg-card__btn {
+    display: inline-block;
+    margin-top: 0.9rem;
+    padding: 0.55em 1.2em;
+    font-family: var(--font-body-family);
+    font-weight: var(--font-body-weight);
+    font-style: var(--font-body-style);
+    font-size: calc(var(--font-body-size, 1rem) * 0.85);
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    border-radius: {{ section.settings.card_border_radius }}px;
+    transition: opacity 0.15s ease;
+  }
+
+  .section-{{ section.id }}-cg .cg-card:hover .cg-card__btn {
+    opacity: 0.85;
+  }
+
+  /* ---- Image (default mode) ---- */
   .section-{{ section.id }}-cg .cg-card__image-wrap {
     height: {{ section.settings.card_image_height }}px;
     max-height: {{ section.settings.card_image_height }}px;
@@ -419,6 +507,17 @@
         },
         {
           "type": "header",
+          "content": "Card style"
+        },
+        {
+          "type": "checkbox",
+          "id": "image_as_background",
+          "label": "Use image as full card background",
+          "info": "Image fills the card as a cover. Text sits at the bottom with a gradient overlay.",
+          "default": false
+        },
+        {
+          "type": "header",
           "content": "Card colors"
         },
         {
@@ -448,6 +547,28 @@
           "id": "badge",
           "label": "Badge text",
           "info": "e.g. NEW, SALE, LIMITED TIME ONLY"
+        },
+        {
+          "type": "header",
+          "content": "CTA Button (optional)"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "info": "Leave blank to hide the button."
+        },
+        {
+          "type": "color",
+          "id": "button_bg_color",
+          "label": "Button background",
+          "default": "#ffffff"
+        },
+        {
+          "type": "color",
+          "id": "button_text_color",
+          "label": "Button text color",
+          "default": "#000000"
         }
       ]
     }
