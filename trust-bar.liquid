@@ -4,7 +4,7 @@
   <div class="trust-bar__track">
     <div class="trust-bar__reel" style="--scroll-duration: {{ section.settings.scroll_speed }}s;">
 
-      {{- /* Primary copy */ -}}
+      {%- comment %}Primary copy{% endcomment -%}
       <span class="trust-bar__item">{{ section.settings.item_1 | escape }}</span>
       <span class="trust-bar__sep" aria-hidden="true">&nbsp;·&nbsp;</span>
       <span class="trust-bar__item"><span class="trust-bar__stars" aria-hidden="true">★★★★★</span>{{ section.settings.item_2 | escape }}</span>
@@ -16,7 +16,7 @@
       <span class="trust-bar__item">{{ section.settings.item_5 | escape }}</span>
       <span class="trust-bar__sep" aria-hidden="true">&nbsp;·&nbsp;&nbsp;&nbsp;·&nbsp;</span>
 
-      {{- /* Duplicate copy for seamless loop */ -}}
+      {%- comment %}Duplicate copy for seamless loop{% endcomment -%}
       <span class="trust-bar__item" aria-hidden="true">{{ section.settings.item_1 | escape }}</span>
       <span class="trust-bar__sep" aria-hidden="true">&nbsp;·&nbsp;</span>
       <span class="trust-bar__item" aria-hidden="true"><span class="trust-bar__stars" aria-hidden="true">★★★★★</span>{{ section.settings.item_2 | escape }}</span>
