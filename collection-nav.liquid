@@ -275,7 +275,7 @@
 
         anchorPairs.forEach(function (p) { p.chip.removeAttribute('aria-current'); });
         pair.chip.setAttribute('aria-current', 'location');
-        pair.chip.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+        scrollNavChipIntoView(pair.chip);
       });
     }, {
       rootMargin: '-25% 0px -65% 0px',
@@ -308,6 +308,19 @@
 
   list.addEventListener('scroll', updateHint, { passive: true });
   updateHint();
+
+  /* ── Helper: scroll only the nav list horizontally – never the page ── */
+  function scrollNavChipIntoView(chip) {
+    var chipLeft  = chip.offsetLeft - list.offsetLeft;
+    var chipRight = chipLeft + chip.offsetWidth;
+    var pad = 16;
+    if (chipLeft < list.scrollLeft + pad) {
+      list.scrollTo({ left: chipLeft - pad, behavior: 'smooth' });
+    } else if (chipRight > list.scrollLeft + list.clientWidth - pad) {
+      list.scrollTo({ left: chipRight - list.clientWidth + pad, behavior: 'smooth' });
+    }
+  }
+
   } // end init()
 
   if (document.readyState === 'loading') {
@@ -437,16 +450,7 @@
   ],
   "presets": [
     {
-      "name": "Collection Nav",
-      "blocks": [
-        {
-          "type": "link",
-          "settings": {
-            "label": "Alle Produkte",
-            "url": "/collections/all"
-          }
-        }
-      ]
+      "name": "Collection Nav"
     }
   ]
 }
