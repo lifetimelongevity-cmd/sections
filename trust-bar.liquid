@@ -1,156 +1,88 @@
 {% if section.settings.show_section %}
-<div class="trust-bar-{{ section.id }}{% if section.settings.background_style == 'subtle' %} trust-bar--subtle{% endif %}">
-  <div class="trust-bar__inner" role="list" aria-label="Vertrauenssignale">
+<div class="trust-bar-{{ section.id }}{% if section.settings.background_style == 'transparent' %} trust-bar--transparent{% endif %}"
+     aria-label="Vertrauenssignale">
+  <div class="trust-bar__track">
+    <div class="trust-bar__reel" style="--scroll-duration: {{ section.settings.scroll_speed }}s;">
 
-    <div class="trust-bar__cell" role="listitem">
-      <div class="trust-bar__icon" aria-hidden="true">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.25"/>
-          <path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <div class="trust-bar__text">
-        <span class="trust-bar__label">{{ section.settings.signal_1_label | escape }}</span>
-        <span class="trust-bar__value">{{ section.settings.signal_1_value | escape }}</span>
-      </div>
+      {{- /* Primary copy */ -}}
+      <span class="trust-bar__item">{{ section.settings.item_1 | escape }}</span>
+      <span class="trust-bar__sep" aria-hidden="true">&nbsp;·&nbsp;</span>
+      <span class="trust-bar__item"><span class="trust-bar__stars" aria-hidden="true">★★★★★</span>{{ section.settings.item_2 | escape }}</span>
+      <span class="trust-bar__sep" aria-hidden="true">&nbsp;·&nbsp;</span>
+      <span class="trust-bar__item">{{ section.settings.item_3 | escape }}</span>
+      <span class="trust-bar__sep" aria-hidden="true">&nbsp;·&nbsp;</span>
+      <span class="trust-bar__item">{{ section.settings.item_4 | escape }}</span>
+      <span class="trust-bar__sep" aria-hidden="true">&nbsp;·&nbsp;</span>
+      <span class="trust-bar__item">{{ section.settings.item_5 | escape }}</span>
+      <span class="trust-bar__sep" aria-hidden="true">&nbsp;·&nbsp;&nbsp;&nbsp;·&nbsp;</span>
+
+      {{- /* Duplicate copy for seamless loop */ -}}
+      <span class="trust-bar__item" aria-hidden="true">{{ section.settings.item_1 | escape }}</span>
+      <span class="trust-bar__sep" aria-hidden="true">&nbsp;·&nbsp;</span>
+      <span class="trust-bar__item" aria-hidden="true"><span class="trust-bar__stars" aria-hidden="true">★★★★★</span>{{ section.settings.item_2 | escape }}</span>
+      <span class="trust-bar__sep" aria-hidden="true">&nbsp;·&nbsp;</span>
+      <span class="trust-bar__item" aria-hidden="true">{{ section.settings.item_3 | escape }}</span>
+      <span class="trust-bar__sep" aria-hidden="true">&nbsp;·&nbsp;</span>
+      <span class="trust-bar__item" aria-hidden="true">{{ section.settings.item_4 | escape }}</span>
+      <span class="trust-bar__sep" aria-hidden="true">&nbsp;·&nbsp;</span>
+      <span class="trust-bar__item" aria-hidden="true">{{ section.settings.item_5 | escape }}</span>
+      <span class="trust-bar__sep" aria-hidden="true">&nbsp;·&nbsp;&nbsp;&nbsp;·&nbsp;</span>
+
     </div>
-
-    <div class="trust-bar__cell" role="listitem">
-      <div class="trust-bar__text">
-        <span class="trust-bar__label trust-bar__label--stars"><span class="trust-bar__stars" aria-hidden="true">★★★★★</span> {{ section.settings.signal_2_label | escape }}</span>
-        <span class="trust-bar__value">{{ section.settings.signal_2_value | escape }}</span>
-      </div>
-    </div>
-
-    <div class="trust-bar__cell" role="listitem">
-      <div class="trust-bar__icon" aria-hidden="true">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="3.5" y="7" width="9" height="7" rx="1.25" stroke="currentColor" stroke-width="1.25"/>
-          <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
-          <circle cx="8" cy="10.5" r="1" fill="currentColor"/>
-        </svg>
-      </div>
-      <div class="trust-bar__text">
-        <span class="trust-bar__label">{{ section.settings.signal_3_label | escape }}</span>
-        <span class="trust-bar__value">{{ section.settings.signal_3_value | escape }}</span>
-      </div>
-    </div>
-
-    <div class="trust-bar__cell" role="listitem">
-      <div class="trust-bar__icon" aria-hidden="true">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="1.5" y="5.5" width="9" height="6" rx="1" stroke="currentColor" stroke-width="1.25"/>
-          <path d="M10.5 7.5h1.5l2 2v2h-3.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
-          <circle cx="4.5" cy="12" r="1.25" stroke="currentColor" stroke-width="1"/>
-          <circle cx="11.5" cy="12" r="1.25" stroke="currentColor" stroke-width="1"/>
-        </svg>
-      </div>
-      <div class="trust-bar__text">
-        <span class="trust-bar__label">{{ section.settings.signal_4_label | escape }}</span>
-        <span class="trust-bar__value">{{ section.settings.signal_4_value | escape }}</span>
-      </div>
-    </div>
-
   </div>
 </div>
 {% endif %}
 
 <style>
   .trust-bar-{{ section.id }} {
-    border-top: 0.5px solid rgba(var(--color-foreground), 0.2);
-    border-bottom: 0.5px solid rgba(var(--color-foreground), 0.2);
-    background: transparent;
-    width: 100%;
-  }
-
-  .trust-bar-{{ section.id }}.trust-bar--subtle {
-    background: var(--color-background-2, rgba(var(--color-foreground), 0.04));
-  }
-
-  .trust-bar-{{ section.id }} .trust-bar__inner {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    max-width: var(--page-width, 1200px);
-    margin: 0 auto;
-    /* Use background-color gap trick for dividers */
-    gap: 0.5px;
-    background-color: rgba(var(--color-foreground), 0.15);
-  }
-
-  .trust-bar-{{ section.id }} .trust-bar__cell {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 16px;
-    background: var(--color-background);
-    min-width: 0;
-  }
-
-  .trust-bar-{{ section.id }}.trust-bar--subtle .trust-bar__cell {
-    background: var(--color-background-2, color-mix(in srgb, rgb(var(--color-foreground)) 4%, rgb(var(--color-background))));
-  }
-
-  .trust-bar-{{ section.id }} .trust-bar__icon {
-    flex-shrink: 0;
-    width: 32px;
+    border-top: 0.5px solid rgba(var(--color-foreground), 0.15);
+    border-bottom: 0.5px solid rgba(var(--color-foreground), 0.15);
+    background-color: var(--color-background-2, rgba(var(--color-foreground), 0.04));
     height: 32px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    border: 0.5px solid rgba(var(--color-foreground), 0.15);
-    color: rgba(var(--color-foreground), 0.55);
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .trust-bar-{{ section.id }}.trust-bar--transparent {
+    background-color: transparent;
+  }
+
+  .trust-bar-{{ section.id }} .trust-bar__track {
+    overflow: hidden;
+    width: 100%;
+  }
+
+  @keyframes trust-bar-scroll-{{ section.id }} {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  .trust-bar-{{ section.id }} .trust-bar__reel {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    animation: trust-bar-scroll-{{ section.id }} var(--scroll-duration, 40s) linear infinite;
+  }
+
+  .trust-bar-{{ section.id }} .trust-bar__item,
+  .trust-bar-{{ section.id }} .trust-bar__sep {
+    font-family: var(--font-body-family);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1;
+    color: rgb(var(--color-foreground));
+    white-space: nowrap;
+  }
+
+  .trust-bar-{{ section.id }} .trust-bar__sep {
+    color: rgba(var(--color-foreground), 0.35);
   }
 
   .trust-bar-{{ section.id }} .trust-bar__stars {
     color: #BA7517;
-  }
-
-  .trust-bar-{{ section.id }} .trust-bar__icon svg {
-    display: block;
-  }
-
-  .trust-bar-{{ section.id }} .trust-bar__text {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-  }
-
-  .trust-bar-{{ section.id }} .trust-bar__label,
-  .trust-bar-{{ section.id }} .trust-bar__value {
-    display: block;
-    font-family: var(--font-body-family);
-    line-height: 1.3;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .trust-bar-{{ section.id }} .trust-bar__label {
-    font-size: 11px;
-    color: rgba(var(--color-foreground), 0.55);
-    font-weight: 400;
-    letter-spacing: 0.01em;
-  }
-
-  .trust-bar-{{ section.id }} .trust-bar__value {
-    font-size: 13px;
-    font-weight: 500;
-    color: rgb(var(--color-foreground));
-    margin-top: 1px;
-  }
-
-  @media (min-width: 768px) {
-    .trust-bar-{{ section.id }} .trust-bar__inner {
-      grid-template-columns: repeat(4, 1fr);
-      grid-template-rows: 1fr;
-    }
-
-    .trust-bar-{{ section.id }} .trust-bar__cell {
-      justify-content: center;
-      text-align: left;
-    }
+    margin-right: 3px;
   }
 </style>
 
@@ -163,7 +95,7 @@
     {
       "type": "checkbox",
       "id": "show_section",
-      "label": "Abschnitt anzeigen",
+      "label": "Anzeigen",
       "default": true
     },
     {
@@ -171,74 +103,54 @@
       "id": "background_style",
       "label": "Hintergrund",
       "options": [
-        { "value": "transparent", "label": "Transparent" },
-        { "value": "subtle", "label": "Subtil" }
+        { "value": "subtle", "label": "Subtil" },
+        { "value": "transparent", "label": "Transparent" }
       ],
-      "default": "transparent"
+      "default": "subtle"
+    },
+    {
+      "type": "range",
+      "id": "scroll_speed",
+      "label": "Scrollgeschwindigkeit (Sekunden)",
+      "min": 20,
+      "max": 80,
+      "step": 5,
+      "default": 40
     },
     {
       "type": "header",
-      "content": "Signal 1"
+      "content": "Inhalte"
     },
     {
       "type": "text",
-      "id": "signal_1_label",
-      "label": "Signal 1 Label",
-      "default": "Bekannt aus"
+      "id": "item_1",
+      "label": "Item 1",
+      "default": "Bekannt aus RTL · SAT1 · SWR1"
     },
     {
       "type": "text",
-      "id": "signal_1_value",
-      "label": "Signal 1 Wert",
-      "default": "RTL · SAT1 · SWR1"
-    },
-    {
-      "type": "header",
-      "content": "Signal 2"
+      "id": "item_2",
+      "label": "Item 2",
+      "info": "Sterne werden automatisch vorangestellt",
+      "default": " 4,8 — Über 1.000 Kunden"
     },
     {
       "type": "text",
-      "id": "signal_2_label",
-      "label": "Signal 2 Label",
-      "default": "★★★★★ 4,8"
+      "id": "item_3",
+      "label": "Item 3",
+      "default": "90 Tage Geld-zurück — kein Formular"
     },
     {
       "type": "text",
-      "id": "signal_2_value",
-      "label": "Signal 2 Wert",
-      "default": "Über 1.000 Kunden"
-    },
-    {
-      "type": "header",
-      "content": "Signal 3"
+      "id": "item_4",
+      "label": "Item 4",
+      "default": "Gratis Versand ab 35 €"
     },
     {
       "type": "text",
-      "id": "signal_3_label",
-      "label": "Signal 3 Label",
-      "default": "Risikofrei kaufen"
-    },
-    {
-      "type": "text",
-      "id": "signal_3_value",
-      "label": "Signal 3 Wert",
-      "default": "90 Tage Garantie"
-    },
-    {
-      "type": "header",
-      "content": "Signal 4"
-    },
-    {
-      "type": "text",
-      "id": "signal_4_label",
-      "label": "Signal 4 Label",
-      "default": "Versandkostenfrei"
-    },
-    {
-      "type": "text",
-      "id": "signal_4_value",
-      "label": "Signal 4 Wert",
-      "default": "Ab 35 € nach DE"
+      "id": "item_5",
+      "label": "Item 5",
+      "default": "Entwickelt von Dr. med. Limmroth · Neurologe"
     }
   ],
   "presets": [
